@@ -1,0 +1,678 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Densest Subgraph Discovery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .team {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .team h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 0.5rem;
+        }
+        
+        .team-members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .member {
+            background-color: var(--light);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            flex: 1 1 200px;
+        }
+        
+        .dataset-card {
+            background-color: white;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dataset-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .dataset-header h2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .dataset-body {
+            padding: 1.5rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background-color: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .time-comparison {
+            background-color: var(--light);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .time-comparison h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .algorithm {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .algorithm-name {
+            font-weight: bold;
+        }
+        
+        .graphs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .graph-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .graph-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            background-color: white;
+        }
+        
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dataset-nav {
+            background-color: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #fff;
+            background-color: var(--accent);
+            border-radius: 0.25rem;
+            margin-left: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .graphs {
+                grid-template-columns: 1fr;
+            }
+            
+            .member {
+                flex: 1 1 100%;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            background-color: var(--primary);
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .toggle-table {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .collapsible {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        
+        .algorithm-fastest {
+            background-color: rgba(46, 204, 113, 0.2);
+            border-left: 4px solid var(--success);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Densest Subgraph Discovery</h1>
+            <div class="subtitle">CS F364 Design and Analysis of Algorithms | Assignment-2</div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="team">
+            <h2>Group 25 Contibutors</h2>
+            <div class="team-members">
+                <div class="member">
+                    <i class="fas fa-user"></i> Adit Rastogi <br>
+                    <small>2022A7PS1330H</small>
+                </div>
+                <div class="member">
+                    <i class="fas fa-user"></i> Karandeep Singh Sodhi <br>
+                    <small>2022A7PS1383H</small>
+                </div>
+                <div class="member">
+                    <i class="fas fa-user"></i> Harshita <br>
+                    <small>2022A7PS1353H</small>
+                </div>
+                <div class="member">
+                    <i class="fas fa-user"></i> Priyanshu Tripathi <br>
+                    <small>2022A7PS1798H</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dataset-nav">
+            <a href="#email" class="nav-link"><i class="fas fa-envelope"></i> Yeast</a>
+            <a href="#wiki" class="nav-link"><i class="fas fa-globe"></i> AS-733</a>
+            <a href="#skitter" class="nav-link"><i class="fas fa-network-wired"></i> CA-Hepth</a>
+        </div>
+        
+        <!-- Email-Enron Dataset -->
+        <div id="email" class="dataset-card">
+            <div class="dataset-header">
+                <h2><i class="fas fa-envelope"></i> Yeast Dataset</h2>
+                <div></div>
+            </div>
+            
+            <div class="dataset-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Cliques Found</div>
+                        <div class="stat-value">1948 (2)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Triangles Found</div>
+                        <div class="stat-value">206</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Densest Subgraph Vertices Found</div>
+                        <div class="stat-value">236 vertices</div>
+                    </div>
+                    <!-- <div class="stat-card">
+                        <div class="stat-title">Edges</div>
+                        <div class="stat-value"></div>
+                    </div> -->
+                </div>
+                
+                <div class="time-comparison">
+                    <h3><i class="fas fa-stopwatch"></i> Algorithm Performance</h3>
+                    
+                    <div class="algorithm algorithm-fastest">
+                        <div class="algorithm-name"><i class="fas fa-bolt"></i> Algorithm 1</div>
+                        <div class="algorithm-time">3.77 seconds</div>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <div class="algorithm-name"><i class="fas fa-clock"></i> Algorithm 4</div>
+                        <div class="algorithm-time">86.08 seconds (~ 1 minute 26 seconds)</div>
+                    </div>
+                    
+                </div>
+                
+                <!-- <button class="toggle-table" onclick="toggleTable('email-table')">
+                    <i class="fas fa-table"></i> Show Clique Size Distribution
+                </button>
+                
+                <div id="email-table" class="collapsible">
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Clique Size</th>
+                                <th>Frequency</th>
+                            </tr>
+                            <tr><td>2</td><td>14,070</td></tr>
+                            <tr><td>3</td><td>7,077</td></tr>
+                            <tr><td>4</td><td>13,319</td></tr>
+                            <tr><td>5</td><td>18,143</td></tr>
+                            <tr><td>6</td><td>22,715</td></tr>
+                            <tr><td>7</td><td>25,896</td></tr>
+                            <tr><td>8</td><td>24,766</td></tr>
+                            <tr><td>9</td><td>22,884</td></tr>
+                            <tr><td>10</td><td>21,393</td></tr>
+                            <tr><td>11</td><td>17,833</td></tr>
+                            <tr><td>12</td><td>15,181</td></tr>
+                            <tr><td>13</td><td>11,487</td></tr>
+                            <tr><td>14</td><td>7,417</td></tr>
+                            <tr><td>15</td><td>3,157</td></tr>
+                            <tr><td>16</td><td>1,178</td></tr>
+                            <tr><td>17</td><td>286</td></tr>
+                            <tr><td>18</td><td>41</td></tr>
+                            <tr><td>19</td><td>10</td></tr>
+                            <tr><td>20</td><td>6</td></tr>
+                        </table>
+                    </div>
+                </div> -->
+                
+                <!-- <div class="graphs">
+                    <div class="graph-container">
+                        <h3>Clique Size Distribution</h3>
+                        <img src="./data/email.jpg" alt="Email-Enron Clique Distribution Graph" class="graph-image">
+                    </div>
+                    <div class="graph-container">
+                        <h3>Algorithm Time Comparison</h3>
+                        <img src="./data/email_time.jpg" alt="Email-Enron Algorithm Time Comparison" class="graph-image">
+                    </div>
+                </div> -->
+            </div>
+        </div>
+        
+        <!-- Wikipedia Vote Dataset -->
+        <div id="wiki" class="dataset-card">
+            <div class="dataset-header">
+                <h2><i class="fas fa-globe"></i> AS-733 Dataset</h2>
+                <div></div>
+            </div>
+            
+            <div class="dataset-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Cliques Found</div>
+                        <div class="stat-value">3132 (2)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Triangles Found</div>
+                        <div class="stat-value">2503</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Densest Subgraph Vertices Found</div>
+                        <div class="stat-value">168 vertices</div>
+                    </div>
+                    <!-- <div class="stat-card">
+                        <div class="stat-title">Edges</div>
+                        <div class="stat-value"></div>
+                    </div> -->
+                </div>
+                
+                <div class="time-comparison">
+                    <h3><i class="fas fa-stopwatch"></i> Algorithm Performance</h3>
+                    
+                    <div class="algorithm algorithm-fastest">
+                        <div class="algorithm-name"><i class="fas fa-bolt"></i> Algorithm 1</div>
+                        <div class="algorithm-time">5.04 seconds</div>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <div class="algorithm-name"><i class="fas fa-clock"></i> Algorithm 4</div>
+                        <div class="algorithm-time">49.72 seconds</div>
+                    </div>
+                    
+                    <!-- <div class="algorithm">
+                        <div class="algorithm-name"><i class="fas fa-clock"></i> Chiba</div>
+                        <div class="algorithm-time">657.34 seconds (~ 11 minutes)</div>
+                    </div> -->
+                </div>
+                
+                <!-- <button class="toggle-table" onclick="toggleTable('wiki-table')">
+                    <i class="fas fa-table"></i> Show Clique Size Distribution
+                </button>
+                
+                <div id="wiki-table" class="collapsible">
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Clique Size</th>
+                                <th>Frequency</th>
+                            </tr>
+                            <tr><td>1</td><td>1,183</td></tr>
+                            <tr><td>2</td><td>8,655</td></tr>
+                            <tr><td>3</td><td>13,718</td></tr>
+                            <tr><td>4</td><td>27,292</td></tr>
+                            <tr><td>5</td><td>48,416</td></tr>
+                            <tr><td>6</td><td>68,872</td></tr>
+                            <tr><td>7</td><td>83,266</td></tr>
+                            <tr><td>8</td><td>76,732</td></tr>
+                            <tr><td>9</td><td>54,456</td></tr>
+                            <tr><td>10</td><td>35,470</td></tr>
+                            <tr><td>11</td><td>21,736</td></tr>
+                            <tr><td>12</td><td>11,640</td></tr>
+                            <tr><td>13</td><td>5,449</td></tr>
+                            <tr><td>14</td><td>2,329</td></tr>
+                            <tr><td>15</td><td>740</td></tr>
+                            <tr><td>16</td><td>208</td></tr>
+                            <tr><td>17</td><td>23</td></tr>
+                        </table>
+                    </div>
+                </div> -->
+                
+                <!-- <div class="graphs">
+                    <div class="graph-container">
+                        <h3>Clique Size Distribution</h3>
+                        <img src="./data/wiki.jpg" alt="Wikipedia Vote Clique Distribution Graph" class="graph-image">
+                    </div>
+                    <div class="graph-container">
+                        <h3>Algorithm Time Comparison</h3>
+                        <img src="./data/wiki_time.jpg" alt="Wikipedia Vote Algorithm Time Comparison" class="graph-image">
+                    </div>
+                </div> -->
+            </div>
+        </div>
+        
+        <!-- Internet Topology Skitter Dataset -->
+        <div id="skitter" class="dataset-card">
+            <div class="dataset-header">
+                <h2><i class="fas fa-network-wired"></i> CA-Hepth Dataset</h2>
+                <div></div>
+            </div>
+            
+            <div class="dataset-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Cliques Found</div>
+                        <div class="stat-value">25937 (2)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Triangles Found</div>
+                        <div class="stat-value">28339</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Densest Subgraph Vertices Found</div>
+                        <div class="stat-value">6882 vertices</div>
+                    </div>
+                    <!-- <div class="stat-card">
+                        <div class="stat-title">Edges</div>
+                        <div class="stat-value"></div>
+                    </div> -->
+                </div>
+                
+                <div class="time-comparison">
+                    <h3><i class="fas fa-stopwatch"></i> Algorithm Performance</h3>
+                    
+                    <div class="algorithm algorithm-fastest">
+                        <div class="algorithm-name"><i class="fas fa-bolt"></i> Algorithm 1</div>
+                        <div class="algorithm-time">9,653.67 seconds (~ 2 hours 41 minutes)</div>
+                    </div>
+                    
+                    <div class="algorithm">
+                        <div class="algorithm-name"><i class="fas fa-clock"></i> Algorithm 4</div>
+                        <div class="algorithm-time">41,289.45 seconds (~ 11 hours 28 minutes)</div>
+                    </div>
+                    
+                    <!-- <div class="algorithm">
+                        <div class="algorithm-name"><i class="fas fa-clock"></i> Tomita06</div>
+                        <div class="algorithm-time">89,483.2 seconds (~ 1 day 51 minutes)</div>
+                    </div> -->
+                </div>
+                
+                <!-- <button class="toggle-table" onclick="toggleTable('skitter-table')">
+                    <i class="fas fa-table"></i> Show Clique Size Distribution
+                </button>
+                
+                <div id="skitter-table" class="collapsible">
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Clique Size</th>
+                                <th>Frequency</th>
+                            </tr>
+                            <tr><td>2</td><td>2,319,807</td></tr>
+                            <tr><td>3</td><td>3,171,609</td></tr>
+                            <tr><td>4</td><td>1,823,321</td></tr>
+                            <tr><td>5</td><td>939,336</td></tr>
+                            <tr><td>6</td><td>684,873</td></tr>
+                            <tr><td>7</td><td>598,284</td></tr>
+                            <tr><td>8</td><td>588,889</td></tr>
+                            <tr><td>9</td><td>608,937</td></tr>
+                            <tr><td>10</td><td>665,661</td></tr>
+                            <tr><td>11</td><td>728,098</td></tr>
+                            <tr><td>12</td><td>798,073</td></tr>
+                            <tr><td>13</td><td>877,282</td></tr>
+                            <tr><td>14</td><td>945,194</td></tr>
+                            <tr><td>15</td><td>980,831</td></tr>
+                            <tr><td>16</td><td>939,987</td></tr>
+                            <tr><td>17</td><td>839,330</td></tr>
+                            <tr><td>18</td><td>729,601</td></tr>
+                            <tr><td>19</td><td>639,413</td></tr>
+                            <tr><td>20</td><td>600,192</td></tr>
+                            <tr><td>21</td><td>611,976</td></tr>
+                            <tr><td>22</td><td>640,890</td></tr>
+                            <tr><td>23</td><td>673,924</td></tr>
+                            <tr><td>24</td><td>706,753</td></tr>
+                            <tr><td>25</td><td>753,633</td></tr>
+                            <tr><td>26</td><td>818,353</td></tr>
+                            <tr><td>27</td><td>892,719</td></tr>
+                            <tr><td>28</td><td>955,212</td></tr>
+                            <tr><td>29</td><td>999,860</td></tr>
+                            <tr><td>30</td><td>1,034,106</td></tr>
+                            <tr><td>31</td><td>1,055,653</td></tr>
+                            <tr><td>32</td><td>1,017,560</td></tr>
+                            <tr><td>33</td><td>946,717</td></tr>
+                            <tr><td>34</td><td>878,552</td></tr>
+                            <tr><td>35</td><td>809,485</td></tr>
+                            <tr><td>36</td><td>744,634</td></tr>
+                            <tr><td>37</td><td>663,650</td></tr>
+                            <tr><td>38</td><td>583,922</td></tr>
+                            <tr><td>39</td><td>520,239</td></tr>
+                            <tr><td>40</td><td>474,301</td></tr>
+                            <tr><td>41</td><td>420,796</td></tr>
+                            <tr><td>42</td><td>367,879</td></tr>
+                            <tr><td>43</td><td>321,829</td></tr>
+                            <tr><td>44</td><td>275,995</td></tr>
+                            <tr><td>45</td><td>222,461</td></tr>
+                            <tr><td>46</td><td>158,352</td></tr>
+                            <tr><td>47</td><td>99,522</td></tr>
+                            <tr><td>48</td><td>62,437</td></tr>
+                            <tr><td>49</td><td>39,822</td></tr>
+                            <tr><td>50</td><td>30,011</td></tr>
+                            <tr><td>51</td><td>25,637</td></tr>
+                            <tr><td>52</td><td>17,707</td></tr>
+                            <tr><td>53</td><td>9,514</td></tr>
+                            <tr><td>54</td><td>3,737</td></tr>
+                            <tr><td>55</td><td>2,042</td></tr>
+                            <tr><td>56</td><td>1,080</td></tr>
+                            <tr><td>57</td><td>546</td></tr>
+                            <tr><td>58</td><td>449</td></tr>
+                            <tr><td>59</td><td>447</td></tr>
+                            <tr><td>60</td><td>405</td></tr>
+                            <tr><td>61</td><td>283</td></tr>
+                            <tr><td>62</td><td>242</td></tr>
+                            <tr><td>63</td><td>146</td></tr>
+                            <tr><td>64</td><td>84</td></tr>
+                            <tr><td>65</td><td>49</td></tr>
+                            <tr><td>66</td><td>22</td></tr>
+                            <tr><td>67</td><td>4</td></tr>
+                        </table>
+                    </div>
+                </div> -->
+                
+                <!-- <div class="graphs">
+                    <div class="graph-container">
+                        <h3>Clique Size Distribution</h3>
+                        <img src="./data/skitter.jpg" alt="Internet Topology Skitter Clique Distribution Graph" class="graph-image">
+                    </div>
+                    <div class="graph-container">
+                        <h3>Algorithm Time Comparison</h3>
+                        <img src="./data/skitter_time.jpg" alt="Internet Topology Skitter Algorithm Time Comparison" class="graph-image">
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>CS F364 Design and Analysis of Algorithms | Assignment-2 | Group 25</p>
+            <p><small>&copy; 2025 | BITS Pilani, Hyderabad Campus</small></p>
+        </div>
+    </footer>
+    
+    <script>
+        function toggleTable(tableId) {
+            const table = document.getElementById(tableId);
+            if (table.style.maxHeight) {
+                table.style.maxHeight = null;
+            } else {
+                table.style.maxHeight = table.scrollHeight + "px";
+            }
+        }
+        
+        // Initialize all tables as collapsed
+        document.addEventListener('DOMContentLoaded', function() {
+            const tables = document.querySelectorAll('.collapsible');
+            tables.forEach(table => {
+                table.style.maxHeight = null;
+            });
+        });
+    </script>
+</body>
+</html>
